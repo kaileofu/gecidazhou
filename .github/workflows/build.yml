@@ -48,7 +48,6 @@ jobs:
         run: |
           ./gradlew assembleRelease -x lint 2>&1 | tee /tmp/build.log
           
-          # 只提取报错关键词附近的 50 行，避免日志过长
           if grep -q -i "error" /tmp/build.log; then
             echo "=== FOUND ERROR ==="
             grep -n -i "error\|failed\|exception" /tmp/build.log | head -50
@@ -58,4 +57,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: app-release
-          path: project/client/android/app/build/outputs/apk/release/*.apk
+          path: project/client/android/app/build/outputs/**/*.apk
