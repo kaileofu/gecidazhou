@@ -34,17 +34,21 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
+      # 1. 先运行 prebuild 生成 android 目录
+      - name: Generate Android project
+        working-directory: project/client
+        run: npx expo prebuild --platform android
+
+      # 2. 然后生成签名，并放进刚生成的目录里
       - name: Generate Keystore
         run: |
           keytool -genkey -v -keystore my-release-key.keystore -alias my-key-alias -keyalg RSA -keysize 2048 -validity 10000 -storepass password123 -keypass password123 -dname "CN=Test, OU=Test, O=Test, L=Test, S=Test, C=US"
           mv my-release-key.keystore project/client/android/app/
         
+      # 3. 最后执行构建
       - name: Build APK
-        working-directory: project/client
-        run: |
-          npx expo prebuild --platform android
-          cd android
-          ./gradlew assembleRelease
+        working-directory: project/client/android
+        run: ./gradlew assembleRelease
           
       - name: Upload APK
         uses: actions/upload-artifact@v4
