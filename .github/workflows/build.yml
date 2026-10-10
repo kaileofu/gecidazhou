@@ -1,0 +1,42 @@
+name: Build APK
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Extract project
+        run: |
+          mkdir project
+          tar -xzf project_*.tar.gz -C project --strip-components=1
+          
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+          
+      - name: Install pnpm
+        run: npm install -g pnpm
+        
+      - name: Install dependencies
+        working-directory: project
+        run: pnpm install
+        
+      - name: Build APK
+        working-directory: project/client
+        run: |
+          npx expo prebuild --platform android
+          cd android
+          ./gradlew assembleRelease
+          
+      - name: Upload APK
+        uses: actions/upload-artifact@v3
+        with:
+          name: app-release
+          path: project/client/android/app/build/outputs/apk/release/*.apk
