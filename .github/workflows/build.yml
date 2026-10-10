@@ -44,6 +44,12 @@ jobs:
         run: |
           keytool -genkey -v -keystore my-release-key.keystore -alias my-key-alias -keyalg RSA -keysize 2048 -validity 10000 -storepass password123 -keypass password123 -dname "CN=Test, OU=Test, O=Test, L=Test, S=Test, C=US"
           mv my-release-key.keystore project/client/android/app/
+
+      # ⚠️ 关键步骤：强制允许 Gradle 生成 APK
+      - name: Enable APK output in gradle.properties
+        run: |
+          echo "android.enableApk=true" >> project/client/android/gradle.properties
+          echo "org.gradle.jvmargs=-Xmx4096m -Dfile.encoding=UTF-8" >> project/client/android/gradle.properties
         
       - name: Build APK
         working-directory: project/client/android
@@ -60,6 +66,4 @@ jobs:
         with:
           name: app-release
           path: |
-            project/**/*.apk
-            project/**/*.aab
             project/**/build/outputs/**/*
