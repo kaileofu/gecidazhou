@@ -43,10 +43,16 @@ jobs:
           keytool -genkey -v -keystore my-release-key.keystore -alias my-key-alias -keyalg RSA -keysize 2048 -validity 10000 -storepass password123 -keypass password123 -dname "CN=Test, OU=Test, O=Test, L=Test, S=Test, C=US"
           mv my-release-key.keystore project/client/android/app/
         
-      # 核心修改：加上 --info 看详细日志，加上 -x lint 跳过类型检查
       - name: Build APK
         working-directory: project/client/android
-        run: ./gradlew assembleRelease --info -x lint
+        run: |
+          ./gradlew assembleRelease -x lint 2>&1 | tee /tmp/build.log
+          
+          # 只提取报错关键词附近的 50 行，避免日志过长
+          if grep -q -i "error" /tmp/build.log; then
+            echo "=== FOUND ERROR ==="
+            grep -n -i "error\|failed\|exception" /tmp/build.log | head -50
+          fi
           
       - name: Upload APK
         uses: actions/upload-artifact@v4
