@@ -59,4 +59,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: app-release
-          path: project/client/android/app/build/outputs/**/*.apk
+          path: |
+            project/**/*.apk
+            project/**/*.aab
+            project/**/build/outputs/**/*
